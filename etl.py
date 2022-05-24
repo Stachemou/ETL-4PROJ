@@ -3,14 +3,17 @@ import json
 import time
 from datetime import datetime
 import os
+from tkinter.ttk import Separator
 import pandas as pd
+import re
 
 # campus_staff = etl.fromcsv('data/Liste_CampusStaff.csv', delimiter = ';')
 students = pd.read_csv('data/Students.csv').drop_duplicates()
 accountings = pd.read_csv('data/Accounting.csv').drop_duplicates()
 alternance = pd.read_csv('data/Alternance.csv').drop_duplicates()
 grades = pd.read_csv('data/Grades.csv').drop_duplicates()
-modules = pd.read_csv('data/Modules.csv').drop_duplicates()
+campus_staff = pd.read_csv('data/Liste_CampusStaff.csv', delimiter=';').drop_duplicates()
+# modules = pd.read_csv('data/Modules.csv').drop_duplicates()
 
 # check students data
 def check_student():
@@ -67,9 +70,21 @@ def check_student():
 					to_push['grades'].append(i.to_json())
 			valides_students.append(json.dumps(to_push))
 
-			print(valides_students)
-		input()
-
 	return valides_students
 
-student_list = check_student()
+regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,}$' 
+
+def check_campus_staff():
+	to_return = []
+	for index, row in campus_staff.iterrows():
+		campus_staff_valide = False
+		if (type(row['id']) == int and type(row['first_name']) == str and type(row['last_name']) == str and
+			re.fullmatch(regex, row['email']) and type(row['email']) == str and type(row['Campus']) == str and type(row['Roles']) == str):
+			campus_staff_valide = True
+		if campus_staff_valide:
+			to_return.append(json.dumps(row.to_json()))
+	return to_return
+
+# check_campus_staff()
+
+# check_student()
