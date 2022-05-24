@@ -13,6 +13,7 @@ accountings = pd.read_csv('data/Accounting.csv').drop_duplicates()
 alternance = pd.read_csv('data/Alternance.csv').drop_duplicates()
 grades = pd.read_csv('data/Grades.csv').drop_duplicates()
 campus_staff = pd.read_csv('data/Liste_CampusStaff.csv', delimiter=';').drop_duplicates()
+intervenants = pd.read_csv('data/Liste_Intervenants.csv').drop_duplicates()
 # modules = pd.read_csv('data/Modules.csv').drop_duplicates()
 
 # check students data
@@ -85,6 +86,18 @@ def check_campus_staff():
 			to_return.append(json.dumps(row.to_json()))
 	return to_return
 
-# check_campus_staff()
+def check_intervenant():
+	to_return = []
+	for index, row in intervenants.iterrows():
+		intervenants_valide = False
+		if (type(row['id']) == int and type(row['first_name']) == str and type(row['last_name']) == str and
+			re.fullmatch(regex, row['email']) and type(row['email']) == str and type(row['modules']) == str and
+			len(row['modules']) == 5 and type(row['Section']) == str):
+			intervenants_valide = True
+		if intervenants_valide:
+			to_return.append(json.dumps(row.to_json()))
+	return to_return
 
+#check_campus_staff()
+#check_intervenant())
 # check_student()
