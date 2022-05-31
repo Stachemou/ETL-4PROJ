@@ -6,6 +6,7 @@ from tkinter.ttk import Separator
 import pandas as pd
 import re
 
+from queries import add_students
 
 students = pd.read_csv('data/Students.csv').drop_duplicates()
 accountings = pd.read_csv('data/Accounting.csv').drop_duplicates()
@@ -60,7 +61,6 @@ def check_student():
 				row_alternance['hire_date'].iloc[0] = datetime.strptime(row_alternance['hire_date'].iloc[0], '%d/%m/%Y').date()
 				alternance_valide = True
 
-		print(students_valide, accounting_valide, grades_valide, alternance_valide)
 
 		if students_valide and accounting_valide:
 			to_push = {'student': row.to_json(), 'accounting': row_accounting.iloc[0].to_json()}
@@ -111,7 +111,8 @@ def check_modules():
 			to_return.append(json.dumps(row.to_json()))
 	return to_return
 
-#check_campus_staff()
-#check_intervenant())
-# check_student()
-check_modules()
+# check_campus_staff()
+# check_intervenant())
+add_students(check_student())
+
+# check_modules()
