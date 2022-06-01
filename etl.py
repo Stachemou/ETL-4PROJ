@@ -29,7 +29,8 @@ def check_student():
 
 		if( type(row['id']) == str and len(row['id']) == 36 and type(row['first_name']) == str and
 			type(row['last_name']) == str and type(row['campus']) == str and
-			type(row['cursus']) == str):
+			type(row['cursus']) == str and type(row['gender']) == str and row['gender'] == 'homme' or 'femme'
+			and type(row['region']) == str):
 			students_valide = True
 		else:
 			students_valide = False
