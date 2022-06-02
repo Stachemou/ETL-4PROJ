@@ -5,10 +5,11 @@ import os
 import numpy
 import pandas as pd
 import re
+import unicodedata
 
 from queries import add_students
 
-students = pd.read_csv('data/Students.csv').drop_duplicates()
+students = pd.read_csv('data/Students.csv').drop_duplicates().sample(10)
 accounting = pd.read_csv('data/Accounting.csv').drop_duplicates()
 alternance = pd.read_csv('data/Alternance.csv').drop_duplicates()
 grades = pd.read_csv('data/Grades.csv').drop_duplicates()
@@ -30,6 +31,8 @@ def check_number(number):
     n_type = type(number)
     return n_type == int or n_type == float
 
+def clean_string(string):
+    return re.sub(r'[^A-Za-z0-9]+', '', unicodedata.normalize("NFKD", string))
 
 def check_students():
     valid_students = []
@@ -43,7 +46,8 @@ def check_students():
             continue
         
         if 'email' not in student:
-            student['email'] = (student["first_name"] + "." + student["last_name"] + "@supinfo.com").lower()
+            student['email'] = f"{clean_string(student['first_name'])}.{clean_string(student['last_name'])}@supinfo.com".lower()
+
 
         # Check accounting
         if accounting["student_id"].isin([student["id"]]).any():
