@@ -2,14 +2,14 @@ import csv
 import json
 from datetime import datetime
 import os
-from tkinter.ttk import Separator
+import numpy
 import pandas as pd
 import re
 
 from queries import add_students
 
 students = pd.read_csv('data/Students.csv').drop_duplicates()
-accountings = pd.read_csv('data/Accounting.csv').drop_duplicates()
+accounting = pd.read_csv('data/Accounting.csv').drop_duplicates()
 alternance = pd.read_csv('data/Alternance.csv').drop_duplicates()
 grades = pd.read_csv('data/Grades.csv').drop_duplicates()
 
@@ -18,62 +18,69 @@ campus_staff = pd.read_csv('data/Liste_CampusStaff.csv', delimiter=';').drop_dup
 intervenants = pd.read_csv('data/Liste_Intervenants.csv').drop_duplicates()
 modules = pd.read_csv('data/Modules.csv').drop_duplicates()
 
-# check students data
-def check_student():
-	valides_students = []
-	for index, row in students.iterrows():
-		students_valide = False
-		accounting_valide = False
-		grades_valide = False
-		alternance_valide = False
-
-		if( type(row['id']) == str and len(row['id']) == 36 and type(row['first_name']) == str and
-			type(row['last_name']) == str and type(row['campus']) == str and
-			type(row['cursus']) == str and type(row['gender']) == str and row['gender'] == 'homme' or 'femme'
-			and type(row['region']) == str):
-			students_valide = True
-		else:
-			students_valide = False
-			break
-
-		if accountings['student_id'].isin([row['id']]).any():
-			row_accounting = accountings.loc[accountings['student_id'] == row['id']].reindex()
-			if (type(row_accounting['student_id'].iloc[0]) == str and len(row_accounting['student_id'].iloc[0]) == 36 and
-				(row_accounting['amount_due'].dtype == float or int) and
-				row_accounting['percent_paid'].dtype == float and row_accounting['amount_paid'].dtype == float
-				):
-				accounting_valide = True
-		
-		if grades['student'].isin([row['id']]).any():
-			rows_grades = grades.loc[grades['student'] == row['id']].reindex()
-			for index, i in rows_grades.iterrows():
-				if(type(i['cursus']) == str and type(i['module']) == str and len(i['module']) == 5 and
-					type(i['student']) == str and len(i['student']) == 36 and type(i['grade']) == float):
-					grades_valide = True
-				else:
-					grades_valide = False
-					break
-
-		if alternance['student'].isin([row['id']]).any():
-			row_alternance = alternance.loc[alternance['student'] == row['id']]
-			if(type(row_alternance['student'].iloc[0]) == str and len(row_alternance['student'].iloc[0]) == 36 and
-				type(row_alternance['contrat'].iloc[0]) == str and type(row_alternance['companyName'].iloc[0]) == str and 
-				type(row_alternance['topay_student']) == int or float and type(row_alternance['topay_company']) == int or float):
-				row_alternance['hire_date'].iloc[0] = datetime.strptime(row_alternance['hire_date'].iloc[0], '%d/%m/%Y').date()
-				alternance_valide = True
+def check_uuidv4(uuid):
+    return type(uuid) == str and len(uuid) == 36
 
 
-		if students_valide and accounting_valide:
-			to_push = {'student': row.to_json(), 'accounting': row_accounting.iloc[0].to_json()}
-			if alternance_valide:
-				to_push['alternance']= row_alternance.iloc[0].to_json()
-			if grades_valide:
-				to_push['grades'] = []
-				for index, i in rows_grades.iterrows():
-					to_push['grades'].append(i.to_json())
-			valides_students.append(json.dumps(to_push))
+def check_str(string):
+    return type(string) == str
 
-	return valides_students
+
+def check_number(number):
+    n_type = type(number)
+    return n_type == int or n_type == float
+
+
+def check_students():
+    valid_students = []
+
+    for index, row in students.iterrows():
+        student = row.to_dict()
+
+        # Check base student
+        if not check_uuidv4(student["id"]) and not check_str(student["first_name"]) and not \
+                check_str(student["last_name"]) and not check_str(student["campus"]) and check_str(student["cursus"]):
+            continue
+        
+        if 'email' not in student:
+            student['email'] = (student["first_name"] + "." + student["last_name"] + "@supinfo.com").lower()
+
+        # Check accounting
+        if accounting["student_id"].isin([student["id"]]).any():
+            student_accounting = accounting.loc[accounting["student_id"] == student["id"]].to_dict(orient="records")[0]
+
+            if check_number(student_accounting["amount_due"]) and check_number(student_accounting["percent_paid"]) and \
+                    check_number(student_accounting["amount_paid"]):
+                student["accounting"] = student_accounting
+
+        # Check jobs
+        # TODO: Multiple jobs
+        if alternance["student"].isin([student["id"]]).any():
+            student_job = alternance.loc[alternance["student"] == student["id"]].to_dict(orient="records")[0]
+
+            if check_str(student_job["contrat"]) and check_str(student_job["companyName"]) and \
+                    check_number(student_job["topay_student"]) and check_number(student_job["topay_company"]):
+                student_job["hire_date"] = datetime.strptime(student_job["hire_date"], "%d/%m/%Y").isoformat()
+                student["job"] = student_job
+
+        # Check grades
+        if grades["student"].isin([student["id"]]).any():
+            student_grades = grades.loc[grades["student"] == student["id"]].to_dict(orient="records")
+            student["grades"] = []
+
+            for grade in student_grades:
+                if check_str(grade["cursus"]) and re.search(r"^\d\w+$", grade["module"]):
+                    module_split = list(filter(None, re.split(r"^(\d)", grade["module"])))
+
+                    grade["year"] = int(module_split[0])
+                    grade["name"] = module_split[1]
+                    del grade["module"]
+
+                    student["grades"].append(grade)
+
+        valid_students.append(student)
+
+    return valid_students
 
 regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,}$' 
 
@@ -114,6 +121,7 @@ def check_modules():
 
 # check_campus_staff()
 # check_intervenant())
-add_students(check_student())
+
+add_students(check_students())
 
 # check_modules()
