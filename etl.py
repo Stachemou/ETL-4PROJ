@@ -1,13 +1,10 @@
-import csv
-import json
 from datetime import datetime
 import os
-import numpy
+import random
+import time
 import pandas as pd
 import re
 import unicodedata
-
-from queries import add_students
 
 students = pd.read_csv('data/Students.csv').drop_duplicates().sample(10)
 accounting = pd.read_csv('data/Accounting.csv').drop_duplicates()
@@ -19,13 +16,13 @@ campus_staff = pd.read_csv('data/Liste_CampusStaff.csv', delimiter=';').drop_dup
 intervenants = pd.read_csv('data/Liste_Intervenants.csv').drop_duplicates()
 modules = pd.read_csv('data/Modules.csv').drop_duplicates()
 
+regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,}$' 
+
 def check_uuidv4(uuid):
     return type(uuid) == str and len(uuid) == 36
 
-
 def check_str(string):
     return type(string) == str
-
 
 def check_number(number):
     n_type = type(number)
@@ -33,6 +30,14 @@ def check_number(number):
 
 def clean_string(string):
     return re.sub(r'[^A-Za-z0-9]+', '', unicodedata.normalize("NFKD", string))
+
+def random_date(start, end, time_format, prop):
+    start_time = time.mktime(time.strptime(start, time_format))
+    end_time = time.mktime(time.strptime(end, time_format))
+
+    ptime = start_time + prop * (end_time - start_time)
+
+    return time.strftime(time_format, time.localtime(ptime))
 
 def check_students():
     valid_students = []
@@ -47,7 +52,10 @@ def check_students():
         
         if 'email' not in student:
             student['email'] = f"{clean_string(student['first_name'])}.{clean_string(student['last_name'])}@supinfo.com".lower()
-
+        
+        # generation d'une date de naissance
+        if 'birth_date' not in student:
+            student['birth_date'] = random_date("1/1/1980", "1/1/2006", '%m/%d/%Y', random.random())
 
         # Check accounting
         if accounting["student_id"].isin([student["id"]]).any():
@@ -86,46 +94,34 @@ def check_students():
 
     return valid_students
 
-regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,}$' 
-
 def check_campus_staff():
-	to_return = []
-	for index, row in campus_staff.iterrows():
-		campus_staff_valide = False
-		if (type(row['id']) == int and type(row['first_name']) == str and type(row['last_name']) == str and
-			re.fullmatch(regex, row['email']) and type(row['email']) == str and type(row['Campus']) == str and type(row['Roles']) == str):
-			campus_staff_valide = True
-		if campus_staff_valide:
-			to_return.append(json.dumps(row.to_json()))
-	return to_return
+    valid_staff = []
+    for index, row in campus_staff.iterrows():
+        if not (check_number(row['id']) and check_str(row['first_name']) and check_str(row['last_name']) and
+			re.fullmatch(regex, row['email']) and check_str(row['email']) and check_str(row['Campus']) and check_str(row['Roles'])):
+            continue
+        else:
+            valid_staff.append(row.to_dict())
+    return valid_staff
 
 def check_intervenant():
-	to_return = []
-	for index, row in intervenants.iterrows():
-		intervenant_valide = False
-		if (type(row['id']) == int and type(row['first_name']) == str and type(row['last_name']) == str and
-			re.fullmatch(regex, row['email']) and type(row['email']) == str and type(row['modules']) == str and
-			len(row['modules']) == 5 and type(row['Section']) == str):
-			intervenant_valide = True
-		if intervenant_valide:
-			to_return.append(json.dumps(row.to_json()))
-	return to_return
+    valid_intervenant= []
+    for index, row in intervenants.iterrows():
+        if not (check_number(row['id']) and check_str(row['first_name']) and check_str(row['last_name']) and
+			re.fullmatch(regex, row['email']) and check_str(row['email']) and check_str(row['modules']) and
+			len(row['modules']) == 5 and check_str(row['Section'])):
+            continue
+        else:
+            valid_intervenant.append(row.to_dict())
+    return valid_intervenant
 
 def check_modules():
-	to_return = []
+	valid_modules = []
 	for index, row in modules.iterrows():
-		module_valide = False
-		if (type(row['id']) == str and len(row['id']) == 36 and type(row['moduleId']) == str and len(row['moduleId']) == 5 and
-			type(row['moduleName']) == str and type(row['moduleDescription']) == str and
-			type(row['credits']) == int and type(row['cursus']) == str):
+		if not (check_uuidv4(row['id']) and check_str(row['moduleId']) and len(row['moduleId']) == 5 and
+			check_str(row['moduleName']) and check_str(row['moduleDescription']) and
+			check_number(row['credits']) and check_str(row['cursus'])):
 			module_valide = True
-		if module_valide:
-			to_return.append(json.dumps(row.to_json()))
-	return to_return
-
-# check_campus_staff()
-# check_intervenant())
-
-add_students(check_students())
-
-# check_modules()
+		else:
+			valid_modules.append(row.to_dict())
+	return valid_modules

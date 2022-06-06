@@ -16,3 +16,17 @@ def add_students(pload):
 	r = requests.post(API + "/students", headers= headers, json = pload)	
 	display_result(r.status_code, r.text)
 
+def add_staff(pload):
+	headers = { "Accept": "application/json;", "Content-Type": "application/json" }
+	r = requests.post(API + "/staff", headers= headers, json = pload)	
+	display_result(r.status_code, r.text)
+
+def add_intervenants(pload):
+	headers = { "Accept": "application/json;", "Content-Type": "application/json" }
+	r = requests.post(API + "/intervenants", headers= headers, json = pload)	
+	display_result(r.status_code, r.text)
+
+def add_modules(pload):
+	headers = { "Accept": "application/json;", "Content-Type": "application/json" }
+	r = requests.post(API + "/students", headers= headers, json = pload)	
+	display_result(r.status_code, r.text)
