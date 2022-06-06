@@ -116,12 +116,12 @@ def check_intervenant():
     return valid_intervenant
 
 def check_modules():
-	valid_modules = []
-	for index, row in modules.iterrows():
-		if not (check_uuidv4(row['id']) and check_str(row['moduleId']) and len(row['moduleId']) == 5 and
+    valid_modules = []
+    for index, row in modules.iterrows():
+        if not (check_uuidv4(row['id']) and check_str(row['moduleId']) and len(row['moduleId']) == 5 and
 			check_str(row['moduleName']) and check_str(row['moduleDescription']) and
 			check_number(row['credits']) and check_str(row['cursus'])):
-			module_valide = True
-		else:
-			valid_modules.append(row.to_dict())
-	return valid_modules
+            continue
+        else:
+            valid_modules.append(row.to_dict())
+    return valid_modules
