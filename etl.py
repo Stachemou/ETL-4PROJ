@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import random
 import time
@@ -73,6 +73,8 @@ def check_students():
             if check_str(student_job["contrat"]) and check_str(student_job["companyName"]) and \
                     check_number(student_job["topay_student"]) and check_number(student_job["topay_company"]):
                 student_job["hire_date"] = datetime.strptime(student_job["hire_date"], "%d/%m/%Y").isoformat()
+                # Generate end date of job
+                student_job["end_date"] = random_date("1/1/2023", "1/1/2024", '%m/%d/%Y', random.random())
                 student["job"] = student_job
 
         # Check grades
