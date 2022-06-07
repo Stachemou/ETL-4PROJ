@@ -6,8 +6,9 @@ from queries import add_students, add_staff, add_intervenants, add_modules
 colorama.init(autoreset=True)
 
 if __name__ == "__main__":
+	# add_modules(check_modules())
 	add_students(check_students())
-	add_staff(check_campus_staff())
-	add_intervenants(check_intervenant())
-	add_modules(check_modules())
+	# add_staff(check_campus_staff())
+	# add_intervenants(check_intervenant())
+	# add_modules(check_modules())
 

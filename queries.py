@@ -28,5 +28,5 @@ def add_intervenants(pload):
 
 def add_modules(pload):
 	headers = { "Accept": "application/json;", "Content-Type": "application/json" }
-	r = requests.post(API + "/students", headers= headers, json = pload)	
+	r = requests.post(API + "/modules", headers= headers, json = pload)	
 	display_result(r.status_code, r.text)
