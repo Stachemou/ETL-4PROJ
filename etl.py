@@ -1,20 +1,9 @@
-from datetime import datetime, timedelta
-import os
+from datetime import datetime
 import random
 import time
 import pandas as pd
 import re
 import unicodedata
-
-students = pd.read_csv('data/Students.csv').drop_duplicates().sample(10)
-accounting = pd.read_csv('data/Accounting.csv').drop_duplicates()
-alternance = pd.read_csv('data/Alternance.csv').drop_duplicates()
-grades = pd.read_csv('data/Grades.csv').drop_duplicates()
-
-campus_staff = pd.read_csv('data/Liste_CampusStaff.csv', delimiter=';').drop_duplicates()
-
-intervenants = pd.read_csv('data/Liste_Intervenants.csv').drop_duplicates()
-modules = pd.read_csv('data/Modules.csv').drop_duplicates()
 
 regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,}$' 
 
@@ -39,7 +28,7 @@ def random_date(start, end, time_format, prop):
 
     return time.strftime(time_format, time.localtime(ptime))
 
-def check_students():
+def check_students(students: pd.DataFrame, accounting: pd.DataFrame, alternance: pd.DataFrame, grades: pd.DataFrame):
     valid_students = []
 
     for index, row in students.iterrows():
@@ -73,6 +62,8 @@ def check_students():
             if check_str(student_job["contrat"]) and check_str(student_job["companyName"]) and \
                     check_number(student_job["topay_student"]) and check_number(student_job["topay_company"]):
                 student_job["hire_date"] = datetime.strptime(student_job["hire_date"], "%d/%m/%Y").isoformat()
+                # change initial to stage
+                student_job["contrat"] = "stage" if student_job["contrat"] == "inital" else student_job["contrat"]
                 # Generate end date of job
                 student_job["end_date"] = random_date("1/1/2023", "1/1/2024", '%m/%d/%Y', random.random())
                 student["job"] = student_job
@@ -96,7 +87,7 @@ def check_students():
 
     return valid_students
 
-def check_campus_staff():
+def check_campus_staff(campus_staff: pd.DataFrame):
     valid_staff = []
     for index, row in campus_staff.iterrows():
         if not (check_number(row['id']) and check_str(row['first_name']) and check_str(row['last_name']) and
@@ -106,7 +97,7 @@ def check_campus_staff():
             valid_staff.append(row.to_dict())
     return valid_staff
 
-def check_intervenant():
+def check_intervenant(intervenants: pd.DataFrame):
     valid_intervenant= []
     for index, row in intervenants.iterrows():
         if not (check_number(row['id']) and check_str(row['first_name']) and check_str(row['last_name']) and
@@ -114,10 +105,11 @@ def check_intervenant():
 			len(row['modules']) == 5 and check_str(row['Section'])):
             continue
         else:
+            row['modules'] = row['modules'][1:]
             valid_intervenant.append(row.to_dict())
     return valid_intervenant
 
-def check_modules():
+def check_modules(modules: pd.DataFrame):
     valid_modules = []
     for index, row in modules.iterrows():
         if not (check_uuidv4(row['id']) and check_str(row['moduleId']) and len(row['moduleId']) == 5 and
@@ -125,5 +117,7 @@ def check_modules():
 			check_number(row['credits']) and check_str(row['cursus'])):
             continue
         else:
+            row['year'] = row['moduleId'][0]
+            row['moduleId'] = row['moduleId'][1:]
             valid_modules.append(row.to_dict())
     return valid_modules
