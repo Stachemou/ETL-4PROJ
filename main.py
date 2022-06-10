@@ -24,7 +24,7 @@ if __name__ == "__main__":
 		elif file == 'Modules.csv':
 			modules = pd.read_csv('data/' + file).drop_duplicates()
 		elif file == 'Students.csv':
-			students = pd.read_csv('data/' + file).drop_duplicates().sample(1)
+			students = pd.read_csv('data/' + file).drop_duplicates()
 		else:
 			print(f"{Fore.RED} Error in data files : Wrong name or wrong data source type")
 			print(f"{Fore.WHITE} Files must be in the following list: Accounting.csv, Alternance.csv ,Grades.csv, Liste_CampusStaff.csv, Liste_Intervenants.csv, Modules.csv, Students.csv")

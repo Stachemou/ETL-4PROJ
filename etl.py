@@ -89,13 +89,30 @@ def check_students(students: pd.DataFrame, accounting: pd.DataFrame, alternance:
 
 def check_campus_staff(campus_staff: pd.DataFrame):
     valid_staff = []
+    roles_list = ["Admin. plateforme", "Direction académique", "Administration", "Pédagogie", "Intervenant", "Étudiant"]
+
     for index, row in campus_staff.iterrows():
         if not (check_number(row['id']) and check_str(row['first_name']) and check_str(row['last_name']) and
 			re.fullmatch(regex, row['email']) and check_str(row['email']) and check_str(row['Campus']) and check_str(row['Roles'])):
             continue
         else:
+            if row['Roles'] not in roles_list:
+                if convert_role(row['Roles']) != None:
+                    row['Roles'] = convert_role(row['Roles'])
+                else:
+                    continue
             valid_staff.append(row.to_dict())
     return valid_staff
+
+def convert_role(role):
+    if role == "Full Professor" or role == "Coordinateur":
+        return "Pédagogie"
+    elif role == "Directeur academique":
+        return "Direction académique"
+    elif role == "Professor":
+        return "Intervenant"
+    else:
+        return None
 
 def check_intervenant(intervenants: pd.DataFrame):
     valid_intervenant= []
@@ -105,6 +122,7 @@ def check_intervenant(intervenants: pd.DataFrame):
 			len(row['modules']) == 5 and check_str(row['Section'])):
             continue
         else:
+            row['Section'] = row['Section'][:-2]
             row['modules'] = row['modules'][1:]
             valid_intervenant.append(row.to_dict())
     return valid_intervenant
