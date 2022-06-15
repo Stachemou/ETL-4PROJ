@@ -52,6 +52,7 @@ def check_students(students: pd.DataFrame, accounting: pd.DataFrame, alternance:
 
             if check_number(student_accounting["amount_due"]) and check_number(student_accounting["percent_paid"]) and \
                     check_number(student_accounting["amount_paid"]):
+                student_accounting["type"] = "Échelonnement"
                 student["accounting"] = student_accounting
 
         # Check jobs
@@ -63,7 +64,7 @@ def check_students(students: pd.DataFrame, accounting: pd.DataFrame, alternance:
                     check_number(student_job["topay_student"]) and check_number(student_job["topay_company"]):
                 student_job["hire_date"] = datetime.strptime(student_job["hire_date"], "%d/%m/%Y").isoformat()
                 # change initial to stage
-                student_job["contrat"] = "stage" if student_job["contrat"] == "inital" else student_job["contrat"]
+                student_job["contrat"] = "stage" if student_job["contrat"] == "initial" else student_job["contrat"]
                 # Generate end date of job
                 student_job["end_date"] = random_date("1/1/2023", "1/1/2024", '%m/%d/%Y', random.random())
                 student["job"] = student_job

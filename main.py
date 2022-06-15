@@ -31,15 +31,15 @@ if __name__ == "__main__":
 			print(f"{Fore.WHITE} And you have : {', '.join(data_files)}")
 			break
 
-	if 'students' in locals() and 'accounting' in locals():
-		add_students(check_students(students, accounting, alternance, grades))
-	else:
-		print(f"{Fore.YELLOW} Warning : No datafile for students or accounting")
-
 	if 'modules' in locals():
 		add_modules(check_modules(modules))
 	else:
 		print(f"{Fore.YELLOW} Warning : No datafile for modules")
+
+	if 'students' in locals() and 'accounting' in locals():
+		add_students(check_students(students, accounting, alternance, grades))
+	else:
+		print(f"{Fore.YELLOW} Warning : No datafile for students or accounting")
 	
 	if 'intervenants' in locals():
 		add_intervenants(check_intervenant(intervenants))
