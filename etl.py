@@ -44,8 +44,8 @@ def check_students(students: pd.DataFrame, accounting: pd.DataFrame, alternance:
         if not check_uuidv4(student["id"]) and not check_str(student["first_name"]) and not \
                 check_str(student["last_name"]) and not check_str(student["campus"]) and not \
                 check_str(student["cursus"]) and not check_number(student["entry_level"]) and \
-                not check_number(student["exit_level"]) and not check_str(student["entry_date"]) and \
-                not check_str(student["exit_date"]):
+                not check_number(student["exit_level"]) and not check_number(student["current_level"]) \
+                and not check_str(student["entry_date"]) and not check_str(student["exit_date"]):
             continue
 
         student["entry_date"] = datetime.strptime(student["entry_date"], "%d/%m/%Y").isoformat()
