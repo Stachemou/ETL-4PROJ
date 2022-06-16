@@ -5,6 +5,7 @@ from etl import check_students, check_campus_staff, check_intervenant, check_mod
 from queries import add_students, add_staff, add_intervenants, add_modules
 import pandas as pd
 from colorama import Style, Fore, Back
+import numpy
 
 colorama.init(autoreset=True)
 
@@ -25,6 +26,7 @@ if __name__ == "__main__":
 			modules = pd.read_csv('data/' + file).drop_duplicates()
 		elif file == 'Students.csv':
 			students = pd.read_csv('data/' + file).drop_duplicates()
+			students = students.replace({numpy.nan: None})
 		else:
 			print(f"{Fore.RED} Error in data files : Wrong name or wrong data source type")
 			print(f"{Fore.WHITE} Files must be in the following list: Accounting.csv, Alternance.csv ,Grades.csv, Liste_CampusStaff.csv, Liste_Intervenants.csv, Modules.csv, Students.csv")

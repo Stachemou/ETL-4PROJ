@@ -5,20 +5,25 @@ import pandas as pd
 import re
 import unicodedata
 
-regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,}$' 
+regex = r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,}$'
+
 
 def check_uuidv4(uuid):
     return type(uuid) == str and len(uuid) == 36
 
+
 def check_str(string):
     return type(string) == str
+
 
 def check_number(number):
     n_type = type(number)
     return n_type == int or n_type == float
 
+
 def clean_string(string):
     return re.sub(r'[^A-Za-z0-9]+', '', unicodedata.normalize("NFKD", string))
+
 
 def random_date(start, end, time_format, prop):
     start_time = time.mktime(time.strptime(start, time_format))
@@ -28,6 +33,7 @@ def random_date(start, end, time_format, prop):
 
     return time.strftime(time_format, time.localtime(ptime))
 
+
 def check_students(students: pd.DataFrame, accounting: pd.DataFrame, alternance: pd.DataFrame, grades: pd.DataFrame):
     valid_students = []
 
@@ -36,16 +42,20 @@ def check_students(students: pd.DataFrame, accounting: pd.DataFrame, alternance:
 
         # Check base student
         if not check_uuidv4(student["id"]) and not check_str(student["first_name"]) and not \
-                check_str(student["last_name"]) and not check_str(student["campus"]) and not check_str(student["cursus"]) \
-                    and not check_number(student["entry_level"]) and not check_number(student["exit_level"]) and not \
-                        check_str(student["entry_date"]) and not check_str(student["exit_date"]):
+                check_str(student["last_name"]) and not check_str(student["campus"]) and not \
+                check_str(student["cursus"]) and not check_number(student["entry_level"]) and \
+                not check_number(student["exit_level"]) and not check_str(student["entry_date"]) and \
+                not check_str(student["exit_date"]):
             continue
+
         student["entry_date"] = datetime.strptime(student["entry_date"], "%d/%m/%Y").isoformat()
-        student["exit_date"] = datetime.strptime(student["exit_date"], "%d/%m/%Y").isoformat()
+        if check_str(student["exit_date"]):
+            student["exit_date"] = datetime.strptime(student["exit_date"], "%d/%m/%Y").isoformat()
 
         if 'email' not in student:
-            student['email'] = f"{clean_string(student['first_name'])}.{clean_string(student['last_name'])}@supinfo.com".lower()
-        
+            student['email'] =\
+                f"{clean_string(student['first_name'])}.{clean_string(student['last_name'])}@supinfo.com".lower()
+
         # generation d'une date de naissance
         if 'birth_date' not in student:
             student['birth_date'] = random_date("1/1/1980", "1/1/2006", '%m/%d/%Y', random.random())
@@ -65,7 +75,8 @@ def check_students(students: pd.DataFrame, accounting: pd.DataFrame, alternance:
             student_job = alternance.loc[alternance["student"] == student["id"]].to_dict(orient="records")[0]
 
             if check_str(student_job["contrat"]) and check_str(student_job["companyName"]) and \
-                    check_number(student_job["topay_student"]) and check_number(student_job["topay_company"] and student_job["hire_date"]):
+                    check_number(student_job["topay_student"]) and check_number(student_job["topay_company"]) and \
+                        check_str(student_job["hire_date"]):
                 student_job["hire_date"] = datetime.strptime(student_job["hire_date"], "%d/%m/%Y").isoformat()
                 # change initial to stage
                 student_job["contrat"] = "stage" if student_job["contrat"] == "initial" else student_job["contrat"]
@@ -92,13 +103,15 @@ def check_students(students: pd.DataFrame, accounting: pd.DataFrame, alternance:
 
     return valid_students
 
+
 def check_campus_staff(campus_staff: pd.DataFrame):
     valid_staff = []
     roles_list = ["Admin. plateforme", "Direction académique", "Administration", "Pédagogie", "Intervenant", "Étudiant"]
 
     for index, row in campus_staff.iterrows():
         if not (check_number(row['id']) and check_str(row['first_name']) and check_str(row['last_name']) and
-			re.fullmatch(regex, row['email']) and check_str(row['email']) and check_str(row['Campus']) and check_str(row['Roles'])):
+                re.fullmatch(regex, row['email']) and check_str(row['email']) and check_str(row['Campus']) and
+                check_str(row['Roles'])):
             continue
         else:
             if row['Roles'] not in roles_list:
@@ -108,6 +121,7 @@ def check_campus_staff(campus_staff: pd.DataFrame):
                     continue
             valid_staff.append(row.to_dict())
     return valid_staff
+
 
 def convert_role(role):
     if role == "Full Professor" or role == "Coordinateur":
@@ -119,12 +133,13 @@ def convert_role(role):
     else:
         return None
 
+
 def check_intervenant(intervenants: pd.DataFrame):
-    valid_intervenant= []
+    valid_intervenant = []
     for index, row in intervenants.iterrows():
         if not (check_number(row['id']) and check_str(row['first_name']) and check_str(row['last_name']) and
-			re.fullmatch(regex, row['email']) and check_str(row['email']) and check_str(row['modules']) and
-			len(row['modules']) == 5 and check_str(row['Section'])):
+                re.fullmatch(regex, row['email']) and check_str(row['email']) and check_str(row['modules']) and
+                len(row['modules']) == 5 and check_str(row['Section'])):
             continue
         else:
             row['Section'] = row['Section'][:-2]
@@ -132,12 +147,13 @@ def check_intervenant(intervenants: pd.DataFrame):
             valid_intervenant.append(row.to_dict())
     return valid_intervenant
 
+
 def check_modules(modules: pd.DataFrame):
     valid_modules = []
     for index, row in modules.iterrows():
         if not (check_uuidv4(row['id']) and check_str(row['moduleId']) and len(row['moduleId']) == 5 and
-			check_str(row['moduleName']) and check_str(row['moduleDescription']) and
-			check_number(row['credits']) and check_str(row['cursus'])):
+                check_str(row['moduleName']) and check_str(row['moduleDescription']) and
+                check_number(row['credits']) and check_str(row['cursus'])):
             continue
         else:
             row['year'] = row['moduleId'][0]
