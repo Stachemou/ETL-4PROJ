@@ -21,7 +21,7 @@ def add_staff(pload):
 
 def add_intervenants(pload):
 	headers = { "Accept": "application/json;", "Content-Type": "application/json" }
-	r = requests.post(API + "/intervenants", headers= headers, json = pload)	
+	r = requests.post(API + "/stcs", headers= headers, json = pload)	
 	display_result(r.status_code, r.text, 'intervenants, have been added')
 
 def add_modules(pload):
