@@ -36,9 +36,13 @@ def check_students(students: pd.DataFrame, accounting: pd.DataFrame, alternance:
 
         # Check base student
         if not check_uuidv4(student["id"]) and not check_str(student["first_name"]) and not \
-                check_str(student["last_name"]) and not check_str(student["campus"]) and check_str(student["cursus"]):
+                check_str(student["last_name"]) and not check_str(student["campus"]) and not check_str(student["cursus"]) \
+                    and not check_number(student["entry_level"]) and not check_number(student["exit_level"]) and not \
+                        check_str(student["entry_date"]) and not check_str(student["exit_date"]):
             continue
-        
+        student["entry_date"] = datetime.strptime(student["entry_date"], "%d/%m/%Y").isoformat()
+        student["exit_date"] = datetime.strptime(student["exit_date"], "%d/%m/%Y").isoformat()
+
         if 'email' not in student:
             student['email'] = f"{clean_string(student['first_name'])}.{clean_string(student['last_name'])}@supinfo.com".lower()
         
@@ -61,7 +65,7 @@ def check_students(students: pd.DataFrame, accounting: pd.DataFrame, alternance:
             student_job = alternance.loc[alternance["student"] == student["id"]].to_dict(orient="records")[0]
 
             if check_str(student_job["contrat"]) and check_str(student_job["companyName"]) and \
-                    check_number(student_job["topay_student"]) and check_number(student_job["topay_company"]):
+                    check_number(student_job["topay_student"]) and check_number(student_job["topay_company"] and student_job["hire_date"]):
                 student_job["hire_date"] = datetime.strptime(student_job["hire_date"], "%d/%m/%Y").isoformat()
                 # change initial to stage
                 student_job["contrat"] = "stage" if student_job["contrat"] == "initial" else student_job["contrat"]
