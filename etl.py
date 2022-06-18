@@ -77,7 +77,6 @@ def check_students(students: pd.DataFrame, accounting: pd.DataFrame, alternance:
                 student["accounting"] = student_accounting
 
         # Check jobs
-        # TODO: Multiple jobs
         if alternance["student"].isin([student["id"]]).any():
             student_job = alternance.loc[alternance["student"] == student["id"]].to_dict(orient="records")[0]
 
