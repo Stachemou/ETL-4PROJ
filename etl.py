@@ -48,8 +48,10 @@ def check_students(students: pd.DataFrame, accounting: pd.DataFrame, alternance:
                 and not check_str(student["entry_date"]) and not check_str(student["exit_date"]):
             continue
 
-        if check_str(student["exit_date"]) and check_str(student["entry_date"]):
+        if check_str(student["entry_date"]):
             student["entry_date"] = datetime.strptime(student["entry_date"], "%d/%m/%Y").isoformat()
+
+        if check_str(studFixent["exit_date"]):
             student["exit_date"] = datetime.strptime(student["exit_date"], "%d/%m/%Y").isoformat()
 
         if 'email' not in student:
@@ -127,7 +129,7 @@ def check_campus_staff(campus_staff: pd.DataFrame):
                     continue
             # generation d'une date de naissance
             if 'birth_date' not in row:
-                row['birth_date'] = random_date("1/1/1970", "1/1/1999", '%m/%d/%Y', random.random())
+                row['birth_date'] = random_date("1/1/1980", "1/1/1999", '%m/%d/%Y', random.random())
             else:
                 if not check_str(row["birth_date"]):
                     continue
@@ -157,7 +159,7 @@ def check_intervenant(intervenants: pd.DataFrame):
         else:
             # generation d'une date de naissance
             if 'birth_date' not in row:
-                row['birth_date'] = random_date("1/1/1970", "1/1/1999", '%m/%d/%Y', random.random())
+                row['birth_date'] = random_date("1/1/1980", "1/1/1999", '%m/%d/%Y', random.random())
             else:
                 if not check_str(row["birth_date"]):
                     continue
