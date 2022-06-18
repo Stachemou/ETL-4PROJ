@@ -1,7 +1,12 @@
 import string
 import requests
 from api_credentials import API
-from colorama import Style, Fore, Back
+from colorama import Style, Fore
+
+
+def send_request(endpoint: string, pload):
+    headers = {"Accept": "application/json;", "Content-Type": "application/json"}
+    return requests.post(API + endpoint, headers=headers, json=pload)
 
 
 def display_result(status_code: int, json: string, information: string):
@@ -12,24 +17,20 @@ def display_result(status_code: int, json: string, information: string):
 
 
 def add_students(pload):
-    headers = {"Accept": "application/json;", "Content-Type": "application/json"}
-    r = requests.post(API + "/students", headers=headers, json=pload)
+    r = send_request("/students", pload)
     display_result(r.status_code, r.text, 'students have been added')
 
 
 def add_staff(pload):
-    headers = {"Accept": "application/json;", "Content-Type": "application/json"}
-    r = requests.post(API + "/staff", headers=headers, json=pload)
+    r = send_request("/staff", pload)
     display_result(r.status_code, r.text, 'staff has been added')
 
 
 def add_intervenants(pload):
-    headers = {"Accept": "application/json;", "Content-Type": "application/json"}
-    r = requests.post(API + "/scts", headers=headers, json=pload)
+    r = send_request("/scts", pload)
     display_result(r.status_code, r.text, 'intervenants, have been added')
 
 
 def add_modules(pload):
-    headers = {"Accept": "application/json;", "Content-Type": "application/json"}
-    r = requests.post(API + "/modules", headers=headers, json=pload)
+    r = send_request("/modules", pload)
     display_result(r.status_code, r.text, 'modules, have been added')

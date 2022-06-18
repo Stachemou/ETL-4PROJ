@@ -22,7 +22,7 @@ def check_number(number):
 
 
 def clean_string(string):
-    return re.sub(r'[^A-Za-z0-9]+', '', unicodedata.normalize("NFKD", string))
+    return re.sub(r'[^A-Za-z\d]+', '', unicodedata.normalize("NFKD", string))
 
 
 def random_date(start, end, time_format, prop):
@@ -76,7 +76,7 @@ def check_students(students: pd.DataFrame, accounting: pd.DataFrame, alternance:
 
             if check_str(student_job["contrat"]) and check_str(student_job["companyName"]) and \
                     check_number(student_job["topay_student"]) and check_number(student_job["topay_company"]) and \
-                        check_str(student_job["hire_date"]):
+                    check_str(student_job["hire_date"]):
                 student_job["hire_date"] = datetime.strptime(student_job["hire_date"], "%d/%m/%Y").isoformat()
                 # change initial to stage
                 student_job["contrat"] = "stage" if student_job["contrat"] == "initial" else student_job["contrat"]
@@ -115,7 +115,7 @@ def check_campus_staff(campus_staff: pd.DataFrame):
             continue
         else:
             if row['Roles'] not in roles_list:
-                if convert_role(row['Roles']) != None:
+                if convert_role(row['Roles']) is not None:
                     row['Roles'] = convert_role(row['Roles'])
                 else:
                     continue
