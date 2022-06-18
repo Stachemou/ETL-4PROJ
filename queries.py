@@ -1,3 +1,4 @@
+from datetime import datetime
 import string
 import requests
 from api_credentials import API
@@ -11,9 +12,9 @@ def send_request(endpoint: string, pload):
 
 def display_result(status_code: int, json: string, information: string):
     if status_code == 200:
-        print(f"{Fore.LIGHTGREEN_EX} Success, {information} {Fore.WHITE}{status_code} : {Style.DIM}{json}")
+        print(f"{Fore.LIGHTGREEN_EX} {datetime.now()} Success, {information} {Fore.WHITE}{status_code} : {Style.DIM}{json}")
     else:
-        print(f"{Fore.RED} Error {status_code} : {json}")
+        print(f"{Fore.RED} {datetime.now()} Error {status_code} : {json}")
 
 
 def add_students(pload):
