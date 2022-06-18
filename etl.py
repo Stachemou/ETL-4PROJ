@@ -48,17 +48,24 @@ def check_students(students: pd.DataFrame, accounting: pd.DataFrame, alternance:
                 and not check_str(student["entry_date"]) and not check_str(student["exit_date"]):
             continue
 
-        student["entry_date"] = datetime.strptime(student["entry_date"], "%d/%m/%Y").isoformat()
-        if check_str(student["exit_date"]):
+        if check_str(student["exit_date"]) and check_str(student["entry_date"]):
+            student["entry_date"] = datetime.strptime(student["entry_date"], "%d/%m/%Y").isoformat()
             student["exit_date"] = datetime.strptime(student["exit_date"], "%d/%m/%Y").isoformat()
 
         if 'email' not in student:
             student['email'] =\
                 f"{clean_string(student['first_name'])}.{clean_string(student['last_name'])}@supinfo.com".lower()
+        else:
+            if not check_str(student['email']) and not re.fullmatch(regex, student['email']):
+                continue
 
         # generation d'une date de naissance
         if 'birth_date' not in student:
             student['birth_date'] = random_date("1/1/1980", "1/1/2006", '%m/%d/%Y', random.random())
+        else:
+            if not check_str(student["birth_date"]):
+                continue
+            student["birth_date"] = datetime.strptime(student["birth_date"], "%d/%m/%Y").isoformat()
 
         # Check accounting
         if accounting["student_id"].isin([student["id"]]).any():
@@ -70,7 +77,6 @@ def check_students(students: pd.DataFrame, accounting: pd.DataFrame, alternance:
                 student["accounting"] = student_accounting
 
         # Check jobs
-        # TODO: Multiple jobs
         if alternance["student"].isin([student["id"]]).any():
             student_job = alternance.loc[alternance["student"] == student["id"]].to_dict(orient="records")[0]
 
@@ -119,6 +125,13 @@ def check_campus_staff(campus_staff: pd.DataFrame):
                     row['Roles'] = convert_role(row['Roles'])
                 else:
                     continue
+            # generation d'une date de naissance
+            if 'birth_date' not in row:
+                row['birth_date'] = random_date("1/1/1970", "1/1/1999", '%m/%d/%Y', random.random())
+            else:
+                if not check_str(row["birth_date"]):
+                    continue
+                row["birth_date"] = datetime.strptime(row["birth_date"], "%d/%m/%Y").isoformat()
             valid_staff.append(row.to_dict())
     return valid_staff
 
@@ -142,6 +155,13 @@ def check_intervenant(intervenants: pd.DataFrame):
                 len(row['modules']) == 5 and check_str(row['Section'])):
             continue
         else:
+            # generation d'une date de naissance
+            if 'birth_date' not in row:
+                row['birth_date'] = random_date("1/1/1970", "1/1/1999", '%m/%d/%Y', random.random())
+            else:
+                if not check_str(row["birth_date"]):
+                    continue
+                row["birth_date"] = datetime.strptime(row["birth_date"], "%d/%m/%Y").isoformat()
             row['Section'] = row['Section'][:-2]
             row['modules'] = row['modules'][1:]
             valid_intervenant.append(row.to_dict())
