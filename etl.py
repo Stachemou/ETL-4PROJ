@@ -119,6 +119,9 @@ def check_campus_staff(campus_staff: pd.DataFrame):
                     row['Roles'] = convert_role(row['Roles'])
                 else:
                     continue
+            # generation d'une date de naissance
+            if 'birth_date' not in row:
+                row['birth_date'] = random_date("1/1/1970", "1/1/1999", '%m/%d/%Y', random.random())
             valid_staff.append(row.to_dict())
     return valid_staff
 
@@ -142,6 +145,9 @@ def check_intervenant(intervenants: pd.DataFrame):
                 len(row['modules']) == 5 and check_str(row['Section'])):
             continue
         else:
+            # generation d'une date de naissance
+            if 'birth_date' not in row:
+                row['birth_date'] = random_date("1/1/1970", "1/1/1999", '%m/%d/%Y', random.random())
             row['Section'] = row['Section'][:-2]
             row['modules'] = row['modules'][1:]
             valid_intervenant.append(row.to_dict())
