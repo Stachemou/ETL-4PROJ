@@ -51,7 +51,7 @@ def check_students(students: pd.DataFrame, accounting: pd.DataFrame, alternance:
         if check_str(student["entry_date"]):
             student["entry_date"] = datetime.strptime(student["entry_date"], "%d/%m/%Y").isoformat()
 
-        if check_str(studFixent["exit_date"]):
+        if check_str(student["exit_date"]):
             student["exit_date"] = datetime.strptime(student["exit_date"], "%d/%m/%Y").isoformat()
 
         if 'email' not in student:
