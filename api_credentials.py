@@ -1,2 +1,2 @@
 # API
-API = "http://localhost:8080/v1/etl"
+API = "https://synthesis-api.v6.rocks/v1/etl"
